@@ -1,0 +1,69 @@
+#!/usr/bin/python
+### BEGIN INIT INFO
+# Provides:          stats-agent
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts the stats agent
+# Description:       stats agent - collects system and process information.
+### END INIT INFO
+
+import sys, time
+
+from statsagent.statsagent import *
+from statsagent.daemon import Daemon
+
+PIDFILE = '/var/run/stats.pid'
+
+class statsDaemon(Daemon):
+
+	def start(self):
+		super(statsDaemon, self).start()
+	
+	def run(self):
+		while True:
+			runner = Runner()
+			payload = {'postdata':str(runner.processes()).replace("'", "\"")}
+			r = requests.post("http://code.stats.io/agent/",data=payload)
+			time.sleep(58)		
+			
+if __name__ == "__main__":
+
+        daemon = statsDaemon(PIDFILE)
+
+        if len(sys.argv) == 2:
+                if 'start' == sys.argv[1]:
+                        try:
+                                daemon.start()
+                        except Exception, e:
+                                print "stats agent couldn't be started"
+                elif 'stop' == sys.argv[1]:
+                        print "Stopping stats agent ..."
+                        daemon.stop()
+                elif 'restart' == sys.argv[1]:
+                        print "Restaring stats agent ..."
+                        daemon.restart()
+                elif 'status' == sys.argv[1]:
+                        try:
+                                pf = file(PIDFILE,'r')
+                                pid = int(pf.read().strip())
+                                pf.close()
+                        except IOError:
+                                pid = None
+                        except SystemExit:
+                                pid = None
+
+                        if pid:
+                                print 'stats agent is running as pid {0}'.format(pid)
+                        else:
+                                print 'stats agent is not running.'
+
+                else:
+                        print "Unknown command"
+                        sys.exit(2)
+                        sys.exit(0)
+        else:
+                print "usage: %s start|stop|restart|status" % sys.argv[0]
+                sys.exit(2)
+
