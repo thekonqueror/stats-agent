@@ -1,6 +1,8 @@
 # stats-agent
 
-stats-agent is a python daemon to collect cpu, memory and process statistics on cloud instances. Collected data is posted in json format to user specified endpoint for further analysis and storage.
+stats-agent is a python daemon to collect cpu, memory and process statistics on cloud instances. Collected data is posted in json format to user specified endpoint for further analysis and storage. 
+
+Thanks to [amonapp/amonagent](https://github.com/amonapp/amonagent) for core.py snippet.
 
 Stats-agent collects following information about running instance:
   - Memory usage
